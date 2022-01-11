@@ -1,0 +1,598 @@
+---
+title: "Final Figures"
+author: "Ashley Wrean"
+date: "7/9/2021"
+output: html_document
+---
+```{r}
+setwd("~/Desktop/Colonialism:Science")
+
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(geojsonio)
+library(leaflet)
+library(rgbif)
+library(viridis)
+library(mapview)
+```
+
+MAPS
+```{r}
+world.map<-geojson_read("countries.geojson", 
+                        what="sp")
+
+map.info<-read.csv("map.info.csv")
+tourism.data<-world.map
+tourism.data@data$ADMIN<-str_replace(tourism.data@data$ADMIN, "The Bahamas", "Bahamas")
+tourism.data@data$ADMIN<-str_replace(tourism.data@data$ADMIN, "Puerto Rico", "PuertoRico")
+tourism.data@data$ADMIN<-str_replace(tourism.data@data$ADMIN, "British Virgin Islands", "BVI")
+tourism.data@data$ADMIN<-str_replace(tourism.data@data$ADMIN, "Antigua and Barbuda", "AntiguaBarbuda")
+tourism.data@data$ADMIN<-str_replace(tourism.data@data$ADMIN, "Cayman Islands", "Caymans")
+tourism.data@data$ADMIN<-str_replace(tourism.data@data$ADMIN, "Dominican Republic", "DominicanRepublic")
+tourism.data@data$ADMIN<-str_replace(tourism.data@data$ADMIN, "Sint Maarten", "SintMaarten")
+tourism.data@data$ADMIN<-str_replace(tourism.data@data$ADMIN, "Saint Kitts and Nevis", "SKN")
+tourism.data@data$ADMIN<-str_replace(tourism.data@data$ADMIN, "Saint Lucia", "SaintLucia")
+tourism.data@data$ADMIN<-str_replace(tourism.data@data$ADMIN, "Saint Vincent and the Grenadines", "SVG")
+tourism.data@data$ADMIN<-str_replace(tourism.data@data$ADMIN, "Trinidad and Tobago", "TT")
+tourism.data@data$ADMIN<-str_replace(tourism.data@data$ADMIN, "Turks and Caicos Islands", "TC")
+tourism.data@data$ADMIN<-str_replace(tourism.data@data$ADMIN, "United States Virgin Islands", "USVI")
+tourism.data@data$ADMIN<-str_replace(tourism.data@data$ADMIN, "Costa Rica", "CostaRica")
+
+tourism.data@data<-left_join(tourism.data@data, map.info, by=c("ADMIN"="countries"))
+```
+Tourism Map (incomplete data)
+```{r}
+colorsT<-colorNumeric(viridis(33),
+             domain = tourism.data@data$int.tourism)
+tourism.data %>% 
+  leaflet() %>% 
+  addPolygons(fillColor = ~colorsT(int.tourism), 
+              fillOpacity = 1,
+              color="white", 
+              opacity=1,
+              weight=1) %>% 
+  addLegend(pal = colorsT,
+            values = tourism.data@data$int.tourism,
+            opacity = 1) %>% 
+  setView(-74,18,5)
+```
+
+BLANK MAPS
+```{r}
+world.map<-geojson_read("countries.geojson", 
+                        what="sp")
+
+map.info<-read.csv("map.info.csv")
+tourism.data<-world.map
+tourism.data@data<-left_join(tourism.data@data, map.info, by=c("ADMIN"="countries"))
+
+blank.map.white<-
+tourism.data %>% 
+  leaflet() %>% 
+  addPolygons(color="white", 
+              opacity=1,
+              weight=1) %>% 
+  setView(-74,18,5)
+
+blank.map.black<-
+  tourism.data %>% 
+  leaflet() %>% 
+  addPolygons(color="black", 
+              opacity=1,
+              weight=1) %>% 
+  setView(-74,18,5)
+
+#mapshot(blank.map.black, file = paste0(getwd(), "/blankmapblack.pdf"))
+```
+
+
+HISPANIOLA
+
+All preserved specimens with species
+```{r}
+Species<-c("All Species")
+Country<-c("Haiti")
+Occurrences<-c(occ_count(country = "HT", basisOfRecord = "PRESERVED_SPECIMEN"))
+HT.DR.DF<-data.frame(Species, Country, Occurrences)
+Hispaniola<-HT.DR.DF %>% 
+  rbind(c("All Species", "Dominican Republic", occ_count(country = "DO", basisOfRecord = "PRESERVED_SPECIMEN"))) %>% 
+  rbind(c("Anolis chlorocyanus", "Haiti", occ_count(country = "HT", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 2467283))) %>% 
+  rbind(c("Anolis chlorocyanus", "Dominican Republic",occ_count(country = "DO", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 2467283))) %>% 
+  rbind(c("Hispaniolan Solenodon", "Haiti", occ_count(country = "HT", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 5219470))) %>% 
+  rbind(c("Hispaniolan Solenodon", "Dominican Republic", occ_count(country = "DO", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 5219470))) %>% 
+    rbind(c("Hispaniolan Hutia", "Haiti", occ_count(country = "HT", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 2437638))) %>% 
+  rbind(c("Hispaniolan Hutia", "Dominican Republic", occ_count(country = "DO", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 2437638))) %>% 
+  rbind(c("Hispaniolan Emerald", "Haiti", occ_count(country = "HT", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 2476100))) %>% 
+  rbind(c("Hispaniolan Emerald", "Dominican Republic", occ_count(country = "DO", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 2476100))) %>% 
+  rbind(c("Hispaniolan Woodpecker", "Haiti", occ_count(country = "HT", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 2478123))) %>% 
+  rbind(c("Hispaniolan Woodpecker", "Dominican Republic", occ_count(country = "DO", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 2478123))) %>% 
+  rbind(c("Zombia antillarum", "Haiti", occ_count(country = "HT", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 8521356))) %>% 
+  rbind(c("Zombia antillarum", "Dominican Republic", occ_count(country = "DO", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 8521356))) %>% 
+  rbind(c("Fuertesia domingensis", "Haiti", occ_count(country = "HT", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 4021172))) %>% 
+  rbind(c("Fuertesia domingensis", "Dominican Republic", occ_count(country = "DO", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 4021172))) %>% 
+  rbind(c("Natalus major", "Haiti", occ_count(country = "HT", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 4265598))) %>% 
+  rbind(c("Natalus major", "Dominican Republic", occ_count(country = "DO", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 4265598)))
+```
+Figure
+```{r}
+Hispaniola %>% 
+  ggplot(aes(x=Species,
+         y=as.numeric(Occurrences),
+         fill=Country))+
+  geom_col(position="fill")+
+  coord_flip()+
+  theme_classic()+
+  ylab("Preserved Specimens from Hispaniola")
+  
+```
+Physical vs. iNaturalist Haiti/DR
+```{r}
+
+basis<-c("iNaturalist")
+numbers<-c(occ_count(country = "HT", datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7"))
+
+records<-data.frame(Species, Country, basis, numbers) %>% 
+  rbind(c("All Species", "Dominican Republic", "iNaturalist", occ_count(country = "DO", datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7")))%>% 
+  rbind(c("All Species", "Haiti", "Preserved Specimens", occ_count(country = "HT", basisOfRecord = "PRESERVED_SPECIMEN"))) %>% 
+  rbind(c("All Species", "Dominican Republic", "Preserved Specimens", occ_count(country = "DO", basisOfRecord = "PRESERVED_SPECIMEN"))) %>% 
+  rbind(c("Anolis chlorocyanus", "Haiti", "iNaturalist", occ_count(country = "HT", datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", taxonKey = 2467283))) %>% 
+  rbind(c("Anolis chlorocyanus", "Dominican Republic", "iNaturalist", occ_count(country = "DO", datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", taxonKey = 2467283))) %>% 
+  rbind(c("Anolis chlorocyanus", "Haiti", "Preserved Specimens", occ_count(country = "HT", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 2467283))) %>%
+  rbind(c("Anolis chlorocyanus", "Dominican Republic", "Preserved Specimens", occ_count(country = "DO", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 2467283))) %>% 
+  rbind(c("Hispaniolan Emerald", "Haiti", "iNaturalist", occ_count(country = "HT", datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", taxonKey = 2476100))) %>% 
+  rbind(c("Hispaniolan Emerald", "Dominican Republic", "iNaturalist", occ_count(country = "DO", datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", taxonKey = 2476100))) %>% 
+  rbind(c("Hispaniolan Emerald", "Haiti", "Preserved Specimens", occ_count(country = "HT", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 2476100))) %>%
+  rbind(c("Hispaniolan Emerald", "Dominican Republic", "Preserved Specimens", occ_count(country = "DO", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 2476100))) %>% 
+ rbind(c("Natalus major", "Haiti", "iNaturalist", occ_count(country = "HT", datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", taxonKey = 4265598))) %>% 
+  rbind(c("Natalus major", "Dominican Republic", "iNaturalist", occ_count(country = "DO", datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", taxonKey = 4265598))) %>% 
+  rbind(c("Natalus major", "Haiti", "Preserved Specimens", occ_count(country = "HT", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 4265598))) %>%
+  rbind(c("Natalus major", "Dominican Republic", "Preserved Specimens", occ_count(country = "DO", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 4265598))) %>% 
+  rbind(c("Hispaniolan Solenodon", "Haiti", "iNaturalist", occ_count(country = "HT", datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", taxonKey = 5219470))) %>% 
+  rbind(c("Hispaniolan Solenodon", "Dominican Republic", "iNaturalist", occ_count(country = "DO", datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", taxonKey = 5219470))) %>% 
+  rbind(c("Hispaniolan Solenodon", "Haiti", "Preserved Specimens", occ_count(country = "HT", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 5219470))) %>%
+  rbind(c("Hispaniolan Solenodon", "Dominican Republic", "Preserved Specimens", occ_count(country = "DO", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 5219470))) %>% 
+ rbind(c("Hispaniolan Woodpecker", "Haiti", "iNaturalist", occ_count(country = "HT", datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", taxonKey = 2478123))) %>% 
+  rbind(c("Hispaniolan Woodpecker", "Dominican Republic", "iNaturalist", occ_count(country = "DO", datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", taxonKey = 2478123))) %>% 
+  rbind(c("Hispaniolan Woodpecker", "Haiti", "Preserved Specimens", occ_count(country = "HT", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 2478123))) %>%
+  rbind(c("Hispaniolan Woodpecker", "Dominican Republic", "Preserved Specimens", occ_count(country = "DO", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 2478123))) %>% 
+  rbind(c("Zombia antillarum", "Haiti", "iNaturalist", occ_count(country = "HT", datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", taxonKey = 8521356))) %>% 
+  rbind(c("Zombia antillarum", "Dominican Republic", "iNaturalist", occ_count(country = "DO", datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", taxonKey = 8521356))) %>% 
+  rbind(c("Zombia antillarum", "Haiti", "Preserved Specimens", occ_count(country = "HT", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 8521356))) %>%
+  rbind(c("Zombia antillarum", "Dominican Republic", "Preserved Specimens", occ_count(country = "DO", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 8521356))) %>% 
+  rbind(c("Fuertesia domingensis", "Haiti", "iNaturalist", occ_count(country = "HT", datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", taxonKey = 8521356))) %>% 
+  rbind(c("Fuertesia domingensis", "Dominican Republic", "iNaturalist", occ_count(country = "DO", datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", taxonKey = 8521356))) %>% 
+  rbind(c("Fuertesia domingensis", "Haiti", "Preserved Specimens", occ_count(country = "HT", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 8521356))) %>%
+  rbind(c("Fuertesia domingensis", "Dominican Republic", "Preserved Specimens", occ_count(country = "DO", basisOfRecord = "PRESERVED_SPECIMEN", taxonKey = 8521356)))
+
+```
+plotted
+```{r}
+records %>% 
+  group_by(Country) %>% 
+  ggplot(aes(x=Country,
+             y=as.numeric(numbers),
+             fill=basis))+
+  coord_flip()+
+  geom_col(position = "fill")+
+  facet_wrap(~Species, nrow = 5)+
+  labs(x="", y="", fill="Basis of Record")
+```
+US based collections from Hispaniola:
+```{r}
+HT.us<-occ_count(country = "HT", publishingCountry = "US")
+DO.us<-occ_count(country = "DO", publishingCountry = "US")
+HT.fossils<-occ_count(country = "HT", publishingCountry = "US", basisOfRecord = "FOSSIL_SPECIMEN")
+DO.fossils<-occ_count(country = "DO", publishingCountry = "US", basisOfRecord = "FOSSIL_SPECIMEN")
+
+HT.bats<-occ_count(country = "HT", taxonKey = 734)
+HT.bats.fossils<-occ_count(country = "HT", taxonKey = 734, basisOfRecord = "FOSSIL_SPECIMEN")
+HT.bats.fossils.us<-occ_count(country = "HT", taxonKey = 734, basisOfRecord = "FOSSIL_SPECIMEN", publishingCountry = "US")
+
+DO.bats<-occ_count(country = "DO", taxonKey = 734)
+DO.bats.fossils<-occ_count(country = "DO", taxonKey = 734, basisOfRecord = "FOSSIL_SPECIMEN")
+DO.bats.fossils.us<-occ_count(country = "DO", taxonKey = 734, basisOfRecord = "FOSSIL_SPECIMEN", publishingCountry = "US")
+
+
+description<-c("All US Published Occurrences")
+country<-c("Haiti")
+num<-c(HT.us)
+
+figure.df<-data.frame(description, country, num)
+figure.info.all.occ<-figure.df %>% 
+  rbind(c("All US Published Occurrences", "Dominican Republic", DO.us)) %>% 
+  rbind(c("All US Published Occurrences", "Hispaniola", HT.us+DO.us)) %>% 
+  rbind(c("All US Published Fossil Specimens", "Haiti", HT.fossils)) %>% 
+  rbind(c("All US Published Fossil Specimens", "Dominican Republic", DO.fossils)) %>% 
+  rbind(c("All US Published Fossil Specimens", "Hispaniola", HT.fossils+DO.fossils)) %>% 
+  rbind(c("All Occurrences", "Haiti", occ_count(country = "HT"))) %>% 
+  rbind(c("All Occurrences", "Dominican Republic", occ_count(country = "DO"))) %>% 
+  rbind(c("All Occurrences", "Hispaniola", occ_count(country = "HT")+occ_count(country = "DO")))
+  
+  
+  
+  bats.description<-c("All Occurrences from the order Chiroptera")
+  bats.country<-c("Haiti")
+  bats.num<-c(HT.bats)
+  
+  figure.bats<-data.frame(bats.description, bats.country, bats.num) %>% 
+  rbind(c("All Occurrences from the order Chiroptera", "Dominican Republic", DO.bats)) %>% 
+  rbind(c("All Occurrences from the order Chiroptera", "Hispaniola", HT.bats+DO.bats)) %>% 
+  rbind(c("All Fossil Specimens from the order Chiroptera", "Haiti", HT.bats.fossils)) %>% 
+  rbind(c("All Fossil Specimens from the order Chiroptera", "Dominican Republic", DO.bats.fossils)) %>% 
+  rbind(c("All Fossil Specimens from the order Chiroptera", "Hispaniola", HT.bats.fossils+DO.bats.fossils)) %>% 
+  rbind(c("All Fossil Specimens from the order Chiroptera Published by the United States", "Haiti", HT.bats.fossils.us)) %>%
+  rbind(c("All Fossil Specimens from the order Chiroptera Published by the United States", "Dominican Republic", DO.bats.fossils.us)) %>% 
+  rbind(c("All Fossil Specimens from the order Chiroptera Published by the United States", "Hispaniola", HT.bats.fossils.us+DO.bats.fossils.us)) %>% 
+    rbind(c("All Occurrences from the Order Chiroptera Published by the United States", "Haiti", occ_count(country = "HT", taxonKey = 734, publishingCountry = "US"))) %>% 
+     rbind(c("All Occurrences from the Order Chiroptera Published by the United States", "Dominican Republic", occ_count(country = "DO", taxonKey = 734, publishingCountry = "US"))) %>% 
+     rbind(c("All Occurrences from the Order Chiroptera Published by the United States", "Hispaniola", occ_count(country = "HT", taxonKey = 734, publishingCountry = "US")+occ_count(country = "DO", taxonKey = 734, publishingCountry = "US")))
+  
+```
+***GRAPH THIS
+All of order chiroptera fossil collections US
+```{r}
+figure.info.all.occ %>% 
+  ggplot(aes(x=country,
+             y=as.numeric(num),
+             fill=description))+
+  geom_col(position = "dodge")+
+  labs(x="", y="Number of GBIF Occurrences", fill="")
+```
+
+```{r}
+figure.bats %>% 
+  ggplot(aes(x=bats.country,
+             y=as.numeric(bats.num),
+             fill=bats.description))+
+  geom_col(position = "dodge")+
+  labs(fill="", y="Number of GBIF Occurrences", x="")+
+  theme(legend.position = c(0.25,0.88))
+```
+```{r}
+figure.bats.fl<-figure.bats %>% 
+  rbind(c("All Fossil Specimens from the Order Chiroptera from the University of Florida Vertebrate Paleontology Dataset", "Hispaniola", occ_count(country = "HT", taxonKey = 734, datasetKey = "2fba9985-ac30-46cb-99bf-91ccde0d8d2f")+occ_count(country = "DO", taxonKey = 734, datasetKey = "2fba9985-ac30-46cb-99bf-91ccde0d8d2f"))) %>% 
+  rbind(c("All Fossil Specimens from the Order Chiroptera from the University of Florida Vertebrate Paleontology Dataset", "Haiti", occ_count(country = "HT", taxonKey = 734, datasetKey = "2fba9985-ac30-46cb-99bf-91ccde0d8d2f"))) %>% 
+  rbind(c("All Fossil Specimens from the Order Chiroptera from the University of Florida Vertebrate Paleontology Dataset", "Dominican Republic", occ_count(country = "DO", taxonKey = 734, datasetKey = "2fba9985-ac30-46cb-99bf-91ccde0d8d2f")))
+```
+
+```{r}
+figure.bats.fl %>% 
+  ggplot(aes(x=bats.country,
+             y=as.numeric(bats.num),
+             fill=bats.description))+
+  geom_col(position = "dodge")+
+  labs(fill="", y="Number of GBIF Occurrences", x="")+
+  theme(legend.position = c(0.25,0.88))
+```
+
+
+
+Anoles
+```{r}
+HT.anoles<-occ_count(country = "HT", taxonKey = 8782549)
+HT.anoles.pub<-occ_count(country = "HT", taxonKey = 8782549, publishingCountry = "US")
+HT.anoles.fossils<-occ_count(country = "HT", taxonKey = 8782549, basisOfRecord = "FOSSIL_SPECIMEN")
+HT.anoles.fossils.us<-occ_count(country = "HT", taxonKey = 8782549, basisOfRecord = "FOSSIL_SPECIMEN", publishingCountry = "US")
+
+DO.anoles<-occ_count(country = "DO", taxonKey = 8782549)
+DO.anoles.pub<-occ_count(country = "DO", taxonKey = 8782549, publishingCountry = "US")
+DO.anoles.fossils<-occ_count(country = "DO", taxonKey = 8782549, basisOfRecord = "FOSSIL_SPECIMEN")
+DO.anoles.fossils.us<-occ_count(country = "DO", taxonKey = 8782549, basisOfRecord = "FOSSIL_SPECIMEN", publishingCountry = "US")
+```
+
+
+INVASIVES
+```{r}
+`Invasive Species`<-c("Rattus rattus")
+Island<-c("Hispaniola")
+`% Total Occurrences`<-c(((occ_count(country = "HT", taxonKey = 2439270)+occ_count(country = "DO", taxonKey = 2439270))/((occ_count(country = "HT")+occ_count(country = "DO")))*100))
+
+invasives<-data.frame(`Invasive Species`, Island, `% Total Occurrences`)
+
+invasive.species<-invasives %>% 
+  rbind(c("Herpestus javanicus", "Hispaniola", ((occ_count(country = "HT", taxonKey = 2434271)+occ_count(country = "DO", taxonKey = 2434271))/((occ_count(country = "HT")+occ_count(country = "DO")))*100))) %>% 
+  rbind(c("Rattus rattus", "Jamaica", occ_count(country = "JM", taxonKey = 2439270)/occ_count(country = "JM")*100)) %>% 
+  rbind(c("Herpestus javanicus", "Jamaica", occ_count(country = "JM", taxonKey = 2434271)/occ_count(country = "JM")*100)) %>% 
+  rbind(c("Rattus rattus", "Puerto Rico", occ_count(country = "PR", taxonKey = 2439270)/occ_count(country = "PR")*100)) %>% 
+  rbind(c("Herpestus javanicus", "Puerto Rico", occ_count(country = "PR", taxonKey = 2434271)/occ_count(country = "PR")*100)) %>% 
+  rbind(c("Rattus rattus", "Trinidad and Tobago", occ_count(country = "TT", taxonKey = 2439270)/occ_count(country = "TT")*100)) %>% 
+  rbind(c("Herpestus javanicus", "Trinidad and Tobago", occ_count(country = "TT", taxonKey = 2434271)/occ_count(country = "TT")*100)) %>% 
+  rbind(c("Rattus rattus", "Cuba", occ_count(country = "CU", taxonKey = 2439270)/occ_count(country = "CU")*100)) %>% 
+  rbind(c("Herpestus javanicus", "Cuba", occ_count(country = "CU", taxonKey = 2434271)/occ_count(country = "CU")*100)) %>% 
+  rbind(c("Rattus rattus", "The Bahamas", occ_count(country = "BS", taxonKey = 2439270)/occ_count(country = "BS")*100)) %>%
+  rbind(c("Herpestus javanicus", "The Bahamas", occ_count(country = "BS", taxonKey = 2434271)/occ_count(country = "BS")*100))
+
+```
+Graph
+```{r}
+invasive.species %>% 
+  ggplot(aes(x= Invasive.Species,
+             y= as.numeric(X..Total.Occurrences),
+             fill=Invasive.Species))+
+  geom_col()+
+  facet_wrap(~Island, ncol=1)+
+  coord_flip()+
+  labs(x="Invasive Species", y="Percentage of Total Occurrences")+
+  theme(legend.position = "none")
+```
+
+Todies
+
+```{r}
+#cuba
+cu.eb.t<-occ_count(country = "CU", taxonKey = 2475383, datasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e")
+cu.in.t<-occ_count(country = "CU", taxonKey = 2475383, datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7")
+cu.ps.t<-occ_count(country = "CU", taxonKey = 2475383, basisOfRecord = "PRESERVED_SPECIMEN")
+
+cu.slices<-c(cu.eb.t, cu.in.t, cu.ps.t)
+#lbls<-c("eBird", "iNaturalist", "Preserved Specimens")
+lbls.cu<-c(paste0("eBird", " (", cu.eb.t, ")"), paste0("iNaturalist", " (", cu.in.t, ")"), paste0("Preserved Specimens", " (", cu.ps.t, ")"))
+pie(cu.slices, labels = lbls.cu, main = "Occurrences from the Genus Todus in Cuba")
+```
+```{r}
+#Jamaica
+jm.eb.t<-occ_count(country = "JM", taxonKey = 2475383, datasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e")
+jm.in.t<-occ_count(country = "JM", taxonKey = 2475383, datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7")
+jm.ps.t<-occ_count(country = "JM", taxonKey = 2475383, basisOfRecord = "PRESERVED_SPECIMEN")
+
+jm.slices<-c(jm.eb.t, jm.in.t, jm.ps.t)
+lbls.jm<-c(paste0("eBird", " (", jm.eb.t, ")"), paste0("iNaturalist", " (", jm.in.t, ")"), paste0("Preserved Specimens", " (", jm.ps.t, ")"))
+pie(jm.slices, labels = lbls.jm, main = "Occurrences from the Genus Todus in Jamaica")
+```
+```{r}
+#Puerto Rico
+pr.eb.t<-occ_count(country = "PR", taxonKey = 2475383, datasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e")
+pr.in.t<-occ_count(country = "PR", taxonKey = 2475383, datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7")
+pr.ps.t<-occ_count(country = "PR", taxonKey = 2475383, basisOfRecord = "PRESERVED_SPECIMEN")
+
+pr.slices<-c(pr.eb.t, pr.in.t, pr.ps.t)
+lbls.pr<-c(paste0("eBird", " (", pr.eb.t, ")"), paste0("iNaturalist", " (", pr.in.t, ")"), paste0("Preserved Specimens", " (", pr.ps.t, ")"))
+pie(pr.slices, labels = lbls.pr, main = "Occurrences from the Genus Todus in Puerto Rico")
+```
+```{r}
+#Haiti
+ht.eb.t<-occ_count(country = "HT", taxonKey = 2475383, datasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e")
+ht.in.t<-occ_count(country = "HT", taxonKey = 2475383, datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7")
+ht.ps.t<-occ_count(country = "HT", taxonKey = 2475383, basisOfRecord = "PRESERVED_SPECIMEN")
+
+ht.slices<-c(ht.eb.t, ht.in.t, ht.ps.t)
+lbls.ht<-c(paste0("eBird", " (", ht.eb.t, ")"), paste0("iNaturalist", " (", ht.in.t, ")"), paste0("Preserved Specimens", " (", ht.ps.t, ")"))
+pie(ht.slices, labels = lbls.ht, main = "Occurrences from the Genus Todus in Haiti")
+
+```
+```{r}
+#Dominican Republic
+do.eb.t<-occ_count(country = "DO", taxonKey = 2475383, datasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e")
+do.in.t<-occ_count(country = "DO", taxonKey = 2475383, datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7")
+do.ps.t<-occ_count(country = "DO", taxonKey = 2475383, basisOfRecord = "PRESERVED_SPECIMEN")
+
+do.slices<-c(do.eb.t, do.in.t, do.ps.t)
+lbls.do<-c(paste0("eBird", " (", do.eb.t, ")"), paste0("iNaturalist", " (", do.in.t, ")"), paste0("Preserved Specimens", " (", do.ps.t, ")"))
+pie(do.slices, labels = lbls.do, main = "Occurrences from the Genus Todus in the Dominican Republic")
+```
+
+
+Magnificent Frigate Bird
+```{r}
+#Cuba
+cu.eb.mfb<-occ_count(country = "CU", taxonKey = 2480189, datasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e")
+cu.in.mfb<-occ_count(country = "CU", taxonKey = 2480189, datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7")
+cu.ps.mfb<-occ_count(country = "CU", taxonKey = 2480189, basisOfRecord = "PRESERVED_SPECIMEN")
+
+cu.slices.mfb<-c(cu.eb.mfb, cu.in.mfb, cu.ps.mfb)
+lbls.cu.mfb<-c(paste0("eBird", " (", cu.eb.mfb, ")"), paste0("iNaturalist", " (", cu.in.mfb, ")"), paste0("Preserved Specimens", " (", cu.ps.mfb, ")"))
+pie(cu.slices.mfb, labels = lbls.cu.mfb, main = "Occurrences of the Magnificent Frigatebird in Cuba")
+
+#Dominican Republic
+do.eb.mfb<-occ_count(country = "DO", taxonKey = 2480189, datasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e")
+do.in.mfb<-occ_count(country = "DO", taxonKey = 2480189, datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7")
+do.ps.mfb<-occ_count(country = "DO", taxonKey = 2480189, basisOfRecord = "PRESERVED_SPECIMEN")
+
+do.slices.mfb<-c(do.eb.mfb, do.in.mfb, do.ps.mfb)
+lbls.do.mfb<-c(paste0("eBird", " (", do.eb.mfb, ")"), paste0("iNaturalist", " (", do.in.mfb, ")"), paste0("Preserved Specimens", " (", do.ps.mfb, ")"))
+pie(do.slices.mfb, labels = lbls.do.mfb, main = "Occurrences of the Magnificent Frigatebird in the Dominican Republic")
+
+#Haiti
+ht.eb.mfb<-occ_count(country = "HT", taxonKey = 2480189, datasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e")
+ht.in.mfb<-occ_count(country = "HT", taxonKey = 2480189, datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7")
+ht.ps.mfb<-occ_count(country = "HT", taxonKey = 2480189, basisOfRecord = "PRESERVED_SPECIMEN")
+
+ht.slices.mfb<-c(ht.eb.mfb, ht.in.mfb, ht.ps.mfb)
+lbls.ht.mfb<-c(paste0("eBird", " (", ht.eb.mfb, ")"), paste0("iNaturalist", " (", ht.in.mfb, ")"), paste0("Preserved Specimens", " (", ht.ps.mfb, ")"))
+pie(ht.slices.mfb, labels = lbls.ht.mfb, main = "Occurrences of the Magnificent Frigatebird in Haiti")
+
+#Jamaica
+jm.eb.mfb<-occ_count(country = "JM", taxonKey = 2480189, datasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e")
+jm.in.mfb<-occ_count(country = "JM", taxonKey = 2480189, datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7")
+jm.ps.mfb<-occ_count(country = "JM", taxonKey = 2480189, basisOfRecord = "PRESERVED_SPECIMEN")
+
+jm.slices.mfb<-c(jm.eb.mfb, jm.in.mfb, jm.ps.mfb)
+lbls.jm.mfb<-c(paste0("eBird", " (", jm.eb.mfb, ")"), paste0("iNaturalist", " (", jm.in.mfb, ")"), paste0("Preserved Specimens", " (", jm.ps.mfb, ")"))
+pie(jm.slices.mfb, labels = lbls.jm.mfb, main = "Occurrences of the Magnificent Frigatebird in Jamaica")
+
+#Puerto Rico
+pr.eb.mfb<-occ_count(country = "PR", taxonKey = 2480189, datasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e")
+pr.in.mfb<-occ_count(country = "PR", taxonKey = 2480189, datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7")
+pr.ps.mfb<-occ_count(country = "PR", taxonKey = 2480189, basisOfRecord = "PRESERVED_SPECIMEN")
+
+pr.slices.mfb<-c(pr.eb.mfb, pr.in.mfb, pr.ps.mfb)
+lbls.pr.mfb<-c(paste0("eBird", " (", pr.eb.mfb, ")"), paste0("iNaturalist", " (", pr.in.mfb, ")"), paste0("Preserved Specimens", " (", pr.ps.mfb, ")"))
+pie(pr.slices.mfb, labels = lbls.pr.mfb, main = "Occurrences of the Magnificent Frigatebird in Puerto Rico")
+
+#Trinidad and Tobago
+tt.eb.mfb<-occ_count(country = "TT", taxonKey = 2480189, datasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e")
+tt.in.mfb<-occ_count(country = "TT", taxonKey = 2480189, datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7")
+tt.ps.mfb<-occ_count(country = "TT", taxonKey = 2480189, basisOfRecord = "PRESERVED_SPECIMEN")
+
+tt.slices.mfb<-c(tt.eb.mfb, tt.in.mfb, tt.ps.mfb)
+lbls.tt.mfb<-c(paste0("eBird", " (", tt.eb.mfb, ")"), paste0("iNaturalist", " (", tt.in.mfb, ")"), paste0("Preserved Specimens", " (", tt.ps.mfb, ")"))
+pie(tt.slices.mfb, labels = lbls.tt.mfb, main = "Occurrences of the Magnificent Frigatebird in Trinidad and Tobago")
+
+#The Bahamas
+bs.eb.mfb<-occ_count(country = "BS", taxonKey = 2480189, datasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e")
+bs.in.mfb<-occ_count(country = "BS", taxonKey = 2480189, datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7")
+bs.ps.mfb<-occ_count(country = "BS", taxonKey = 2480189, basisOfRecord = "PRESERVED_SPECIMEN")
+
+bs.slices.mfb<-c(bs.eb.mfb, bs.in.mfb, bs.ps.mfb)
+lbls.bs.mfb<-c(paste0("eBird", " (", bs.eb.mfb, ")"), paste0("iNaturalist", " (", bs.in.mfb, ")"), paste0("Preserved Specimens", " (", bs.ps.mfb, ")"))
+pie(bs.slices.mfb, labels = lbls.bs.mfb, main = "Occurrences of the Magnificent Frigatebird in the the Bahamas")
+
+
+```
+
+Todies:
+
+```{r}
+#Dominican Republic
+todies.do.eb<-occ_search(country = "DO", taxonKey = 2475383, datasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e", limit = 10000)$data
+todies.do.in<-occ_search(country = "DO", taxonKey = 2475383, datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", limit = 10000)$data
+todies.do.ps<-occ_search(country = "DO", taxonKey = 2475383, basisOfRecord = "PRESERVED_SPECIMEN", limit = 10000)$data
+
+#Haiti
+todies.ht.eb<-occ_search(country = "HT", taxonKey = 2475383, datasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e", limit = 10000)$data
+todies.ht.in<-occ_search(country = "HT", taxonKey = 2475383, datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", limit = 10000)$data
+todies.ht.ps<-occ_search(country = "HT", taxonKey = 2475383, basisOfRecord = "PRESERVED_SPECIMEN", limit = 10000)$data
+
+#Cuba
+todies.cu.eb<-occ_search(country = "CU", taxonKey = 2475383, datasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e", limit = 10000)$data
+todies.cu.in<-occ_search(country = "CU", taxonKey = 2475383, datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", limit = 10000)$data
+todies.cu.ps<-occ_search(country = "CU", taxonKey = 2475383, basisOfRecord = "PRESERVED_SPECIMEN", limit = 10000)$data
+
+#Puerto Rico
+todies.pr.eb<-occ_search(country = "PR", taxonKey = 2475383, datasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e", limit = 15000)$data
+todies.pr.in<-occ_search(country = "PR", taxonKey = 2475383, datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", limit = 10000)$data
+todies.pr.ps<-occ_search(country = "PR", taxonKey = 2475383, basisOfRecord = "PRESERVED_SPECIMEN", limit = 10000)$data
+
+#Jamaica
+todies.jm.eb<-occ_search(country = "JM", taxonKey = 2475383, datasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e", limit = 10000)$data
+todies.jm.in<-occ_search(country = "JM", taxonKey = 2475383, datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", limit = 10000)$data
+todies.jm.ps<-occ_search(country = "JM", taxonKey = 2475383, basisOfRecord = "PRESERVED_SPECIMEN", limit = 10000)$data
+```
+
+bind
+```{r}
+todies.do<-bind_rows(todies.do.eb, todies.do.in, todies.do.ps)
+todies.ht<-bind_rows(todies.ht.eb, todies.ht.in, todies.ht.ps)
+todies.cu<-bind_rows(todies.cu.eb, todies.cu.in, todies.cu.ps)
+todies.pr<-bind_rows(todies.pr.eb, todies.pr.in, todies.pr.ps)
+todies.jm<-bind_rows(todies.jm.eb, todies.jm.in, todies.jm.ps)
+
+todies.all<-bind_rows(todies.do, todies.ht, todies.cu, todies.pr, todies.jm)
+eb.all<-bind_rows(todies.do.eb, todies.ht.eb, todies.cu.eb, todies.pr.eb, todies.jm.eb)
+in.all<-bind_rows(todies.do.in, todies.ht.in, todies.cu.in, todies.pr.in, todies.jm.in)
+ps.all<-bind_rows(todies.do.ps, todies.ht.ps, todies.cu.ps, todies.pr.ps, todies.jm.ps)
+```
+
+plotting
+
+```{r}
+library(maps)
+library(mapdata)
+
+
+map('worldHires', c('Cuba', 'Haiti', 'Puerto Rico', 'Dominican Republic', 'Jamaica'), fill=TRUE, col = "grey") + 
+  points(ps.all$decimalLongitude, ps.all$decimalLatitude, pch=1, col="purple", cex=.5)
+  points(in.all$decimalLongitude, in.all$decimalLatitude, pch=8, col="yellow", cex=.5)+
+  points(eb.all$decimalLongitude, eb.all$decimalLatitude, pch=20, col="darkred", cex=.5) 
+
+  
+map('worldHires', c('Cuba', 'Haiti', 'Puerto Rico', 'Dominican Republic', 'Jamaica'), fill=TRUE, col = "grey") 
+points(eb.all$decimalLongitude, eb.all$decimalLatitude, pch=23, col="darkred", cex=.5, lwd=.2) 
+points(in.all$decimalLongitude, in.all$decimalLatitude, pch=8, col="yellow", cex=.5, lwd=.2)
+points(ps.all$decimalLongitude, ps.all$decimalLatitude, pch=1, col="purple", cex=.5, lwd=.2)
+
+map('worldHires', c('Cuba', 'Haiti', 'Puerto Rico', 'Dominican Republic', 'Jamaica'), fill=TRUE, col = "white") 
+points(eb.all$decimalLongitude, eb.all$decimalLatitude, pch=21, col="cadetblue4", cex=.3, lwd=.3)
+points(in.all$decimalLongitude, in.all$decimalLatitude, pch=21, col="cadetblue3", cex=.3, lwd=.3)
+points(ps.all$decimalLongitude, ps.all$decimalLatitude, pch=8, col="chartreuse", cex=.3, lwd=.3)
+
+
+```
+```{r}
+do.t.eb<-todies.do.eb %>% 
+  select(country, year, datasetKey)
+do.t.in<-todies.do.in %>% 
+  select(country, year, datasetKey)
+do.t.ps<-todies.do.ps %>% 
+  select(country, year, basisOfRecord)
+
+do.todies<-bind_rows(do.t.eb, do.t.in, do.t.ps)
+
+ht.t.eb<-todies.ht.eb %>% 
+  select(country, year, datasetKey)
+ht.t.in<-todies.ht.in %>% 
+  select(country, year, datasetKey)
+ht.t.ps<-todies.ht.ps %>% 
+  select(country, year, basisOfRecord)
+
+ht.todies<-bind_rows(ht.t.eb, ht.t.in, ht.t.ps)
+
+cu.t.eb<-todies.cu.eb %>% 
+  select(country, year, datasetKey)
+cu.t.in<-todies.cu.in %>% 
+  select(country, year, datasetKey)
+cu.t.ps<-todies.cu.ps %>% 
+  select(country, year, basisOfRecord)
+
+cu.todies<-bind_rows(cu.t.eb, cu.t.in, cu.t.ps)
+
+pr.t.eb<-todies.pr.eb %>% 
+  select(country, year, datasetKey)
+pr.t.in<-todies.pr.in %>% 
+  select(country, year, datasetKey)
+pr.t.ps<-todies.pr.ps %>% 
+  select(country, year, basisOfRecord)
+
+pr.todies<-bind_rows(pr.t.eb, pr.t.in, pr.t.ps)
+
+jm.t.eb<-todies.jm.eb %>% 
+  select(country, year, datasetKey)
+jm.t.in<-todies.jm.in %>% 
+  select(country, year, datasetKey)
+jm.t.ps<-todies.jm.ps %>% 
+  select(country, year, basisOfRecord)
+
+jm.todies<-bind_rows(jm.t.eb, jm.t.in, jm.t.ps)
+
+todies.hist.all<-bind_rows(do.todies, ht.todies, cu.todies, pr.todies, jm.todies)
+
+ 
+todies.histogram<-todies.hist.all %>% 
+  mutate(basis.of.info = ifelse(is.na(basisOfRecord), ifelse(datasetKey=="4fa7b334-ce0d-4e88-aaae-2e0c138d049e", "eBird", "iNaturalist"), "Preserved Specimen"))
+          
+todies.histogram %>% 
+  ggplot()+
+  geom_bar(aes(x=year, fill=basis.of.info))+
+  theme_classic()+
+  labs(x="Year", y="Number of Occurrences", fill="Basis of Observation")+
+  theme(legend.position = c(.25, .75))
+```
+
+```{r}
+map('worldHires', c('Trinidad', 'Tobago'), fill=TRUE, col = "white") 
+
+oilbird.ebird<-occ_count(taxonKey = 2497150, country = "TT", datasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e")
+oilbird.in<-occ_count(taxonKey = 2497150, country = "TT", datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7")
+oilbird.ps<-occ_count(taxonKey = 2497150, country = "TT", basisOfRecord = "PRESERVED_SPECIMEN")
+
+oilbird.slices<-c(oilbird.ebird, oilbird.in, oilbird.ps)
+lbls.oilbird<-c(paste0("eBird", " (", oilbird.ebird, ")"), paste0("iNaturalist", " (", oilbird.in, ")"), paste0("Preserved Specimens", " (", oilbird.ps, ")"))
+pie(oilbird.slices, labels = lbls.oilbird, main = "Occurrences of Steatornis caripensis in Trinidad and Tobago")
+
+
+oilbird.eb<-occ_search(country = "TT", taxonKey = 2497150, datasetKey = "4fa7b334-ce0d-4e88-aaae-2e0c138d049e", limit = 1500)$data
+oilbird.in<-occ_search(country = "TT", taxonKey = 2497150, datasetKey = "50c9509d-22c7-4a22-a47d-8c48425ef4a7", limit = 100)$data
+oilbird.ps<-occ_search(country = "TT", taxonKey = 2497150, basisOfRecord = "PRESERVED_SPECIMEN", limit = 100)$data
+
+map('worldHires', c('Trinidad', 'Tobago'), fill=TRUE, col = "white") 
+points(oilbird.eb$decimalLongitude, oilbird.eb$decimalLatitude, pch=21, col="red", cex=.5, lwd=.5)
+points(oilbird.in$decimalLongitude, oilbird.in$decimalLatitude, pch=21, col="blue", cex=.5, lwd=.5)
+points(oilbird.ps$decimalLongitude, oilbird.ps$decimalLatitude, pch=8, col="green", cex=.5, lwd=.5)
+```
+
